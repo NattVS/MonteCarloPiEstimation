@@ -1,34 +1,62 @@
+import com.zeroc.Ice.Communicator;
+import com.zeroc.Ice.Util;
 import Demo.WorkerPrx;
+import java.util.Scanner;
 
 public class Worker {
-    public static void main(String[] args) {
-        try (com.zeroc.Ice.Communicator communicator = com.zeroc.Ice.Util.initialize(args)) {
-            // Crear un adaptador para el worker en un puerto específico
 
-            Demo.Worker worker = new WorkerI();
-            com.zeroc.Ice.ObjectAdapter adapter = communicator.createObjectAdapterWithEndpoints("WorkerAdapter", "default -p 10001");
-            com.zeroc.Ice.ObjectPrx object  = adapter.add(worker, com.zeroc.Ice.Util.stringToIdentity("Worker1")); 
-            adapter.activate(); // Activar el adaptador
+    private static Communicator communicator;
+    private static Demo.MasterPrx masterProxy;
+
+    public static void main(String[] args) {
+        try {
+
+            communicator = Util.initialize(args);
+            masterProxy = Demo.MasterPrx.checkedCast(communicator.stringToProxy("Master:default -p 10000"));
+
+            int workerCount = masterProxy.getWorkerCount() + 1;
+            int port = 10000 + workerCount;
+            String name = "Worker" + workerCount;
+
+            Demo.Worker worker = new WorkerI(name);
+            com.zeroc.Ice.ObjectAdapter adapter = communicator.createObjectAdapterWithEndpoints("WorkerAdapter", "default -p " + port);
+            com.zeroc.Ice.ObjectPrx object = adapter.add(worker, com.zeroc.Ice.Util.stringToIdentity(name)); 
+            adapter.activate();
 
             WorkerPrx workerPrx = WorkerPrx.checkedCast(object);
 
-            Demo.MasterPrx masterProxy = Demo.MasterPrx.checkedCast(communicator.stringToProxy("Master:default -p 10000"));
-
-            if (masterProxy != null){
-                boolean added = masterProxy.addWorker("Worker1", workerPrx);
-                if (added){
-                    System.out.println("Worker registrado exitosamente en el Master.");
-                } else {
-                    System.out.println("No se pudo registrar el Worker en el Master. Ya existe un worker con ese nombre.");
-                }
-            } else {
-                System.out.println("No se pudo conectar al Master.");
+            if (masterProxy.addWorker(name, workerPrx)){
+                System.out.println(name + " registrado exitosamente en el Master.");
+                System.out.println(name + " listo y escuchando en el puerto " + port + "..."); 
             }
 
-            System.out.println("Worker listo y escuchando en el puerto 10001...");
+            Thread scannerThread = new Thread(() -> {
+                Scanner scanner = new Scanner(System.in);
+                System.out.println("Escriba exit si desea finalizar la ejecucion del worker.");
+                while (true) {
+                    String input = scanner.nextLine();
+                    if ("exit".equalsIgnoreCase(input)) {
+                        try {
+                            if (masterProxy != null) {
+                                masterProxy.removeWorker(name);
+                            }
+                            System.out.println("Worker eliminado. Saliendo...");
+                            communicator.close();
+                            break;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                scanner.close(); 
+            });
+            scannerThread.start();
+            
             communicator.waitForShutdown();
-        } catch (Exception e){
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 }

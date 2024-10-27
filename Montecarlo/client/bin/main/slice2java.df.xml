@@ -1,0 +1,15 @@
+<state>
+  <timestamp value='1730061314177' />
+  <sourceSet name='default'>
+    <source name='C:\Users\ASUS\Desktop\Montecarlo\Montecarlo.ice'>
+      <file name='C:\Users\ASUS\Desktop\Montecarlo\client\build\generated-src\Demo\Worker.java' />
+      <file name='C:\Users\ASUS\Desktop\Montecarlo\client\build\generated-src\Demo\Master.java' />
+      <file name='C:\Users\ASUS\Desktop\Montecarlo\client\build\generated-src\Demo\WorkerPrx.java' />
+      <file name='C:\Users\ASUS\Desktop\Montecarlo\client\build\generated-src\Demo\_WorkerPrxI.java' />
+      <file name='C:\Users\ASUS\Desktop\Montecarlo\client\build\generated-src\Demo\MasterPrx.java' />
+      <file name='C:\Users\ASUS\Desktop\Montecarlo\client\build\generated-src\Demo\_MasterPrxI.java' />
+    </source>
+    <arg value='C:\Program Files\ZeroC\Ice-3.7.10\\bin\slice2java.exe' />
+    <arg value='-IC:\Program Files\ZeroC\Ice-3.7.10\\slice' />
+  </sourceSet>
+</state>

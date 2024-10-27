@@ -7,7 +7,7 @@ public class Master {
             adapter.activate();
             
             //connectToWorkers(communicator);
-            System.out.println("Master está corriendo y escuchando en el puerto 10000...");
+            System.out.println("Master corriendo y escuchando en el puerto 10000...");
             communicator.waitForShutdown();
         }
     }

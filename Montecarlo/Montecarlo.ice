@@ -2,12 +2,16 @@ module Demo
 {
     interface Worker
     {
-        int countPointsInCircle(int numPoints);
+        ["async"] int countPointsInCircle(int numPoints);
+        void ping();
+        string getName();
     }
 
     interface Master
     {
-        double calculatePi(int totalPoints);
+        ["async"] float calculatePi(int totalPoints);
         bool addWorker(string name, Worker* w);
+        bool removeWorker(string name);
+        int getWorkerCount();
     }
 }

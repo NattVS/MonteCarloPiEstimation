@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.Timer;
 import java.util.TimerTask;
-
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -58,27 +61,54 @@ public class MasterI implements Demo.Master {
             return 0.0f;
         }
 
+
         System.out.printf("Estimando pi con %d puntos y %d trabajadores...%n", numPoints, numWorkers);
         int pointsPerWorker = numPoints / numWorkers;
+
+        long startTime = System.nanoTime();  
 
         List<CompletableFuture<Integer>> futures = createWorkerTasks(pointsPerWorker);
         int totalPointsInCircle = gatherResults(futures);
 
+        long endTime = System.nanoTime();  // Finalizar tiempo
+        long duration = endTime - startTime;  // Calcular duración en nanosegundos
+
         if (totalPointsInCircle < 0) {
             return 0.0f;
         }
+
+        writeResultsToFile(numPoints, numWorkers, duration);
 
         float estimation =  4.0f * totalPointsInCircle / numPoints;
         System.out.println("Estimacion final: "+ estimation);
         System.out.println("--------------------------------------");
         return estimation;
     }
-       
+
+   private void writeResultsToFile(int numPoints, int numWorkers, long duration) {
+        String filePath = "resultados.txt";
+        File file = new File(filePath);
+
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+        } catch (IOException e) {
+            System.err.println("Error al verificar/crear el archivo: " + e.getMessage());
+            return;
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+            writer.write("Puntos: " + numPoints + ", Trabajadores: " + numWorkers + ", Tiempo: " + (duration / 1_000_000) + " ms");
+            writer.newLine();
+        } catch (IOException e) {
+            System.err.println("Error al escribir en el archivo: " + e.getMessage());
+        }
+    }       
 
     private List<CompletableFuture<Integer>> createWorkerTasks(int pointsPerWorker) {
         List<CompletableFuture<Integer>> futures = new ArrayList<>();
 
-        // Recorremos el HashMap de trabajadores
         for (Map.Entry<String, WorkerPrx> entry : workers.entrySet()) {
             String workerName = entry.getKey();
             WorkerPrx worker = entry.getValue();

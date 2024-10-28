@@ -8,7 +8,7 @@ The ratio of points that fall inside the circle to the total number of points th
 
 π will be estimated using the formula:
 
-$$ \pi \approx 4 \times \frac{Number \.: of \.: points \.: inside .\: the \.:circle}{Total \.: number \.: of \.: point \.: thrown}$$
+$$ \pi \approx 4 \times \frac{Number \: of \: points \: inside \: the \:circle}{Total \: number \: of \: point \: thrown}$$
 
 ## **Client-Master-Workers Model**
 
@@ -103,6 +103,8 @@ The π estimation solution using the Monte Carlo method was designed following a
 
 ## **Results**
 See [https://github.com/NattVS/MonteCarloPiEstimation/blob/main/Montecarlo/resultados.txt](Results.txt)
+
+
 **Test 1**  
 **Inputs**: 100 points, 1 worker.  
 **Outputs**:  

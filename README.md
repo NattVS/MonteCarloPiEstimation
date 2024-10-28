@@ -31,13 +31,6 @@ From the project root /MonteCarloPiEstimation/Montecarlo/...
     .\gradlew build
     ```
 
-3. Compile the Master, Worker, and Client:
-    ```bash
-    .\gradlew :server:build
-    .\gradlew :worker:build
-    .\gradlew :client:build
-    ```
-
 ## Running the Project
 
 From the project root /MonteCarloPiEstimation/Montecarlo/...

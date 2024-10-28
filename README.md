@@ -1,56 +1,61 @@
-# Proyecto de Estimación de Pi con Ice
 
-Este proyecto utiliza [Ice](https://zeroc.com/products/ice) para distribuir cálculos de estimación de Pi entre varios "workers". El cliente se conecta a un "master" que coordina estos cálculos a través de múltiples instancias.
+# Pi Estimation Project with Ice
 
-## Prerrequisitos
+This project uses [Ice](https://zeroc.com/products/ice) to distribute Pi estimation calculations across several "workers." The client connects to a "master" that coordinates these calculations through multiple instances.
 
-Asegúrate de tener instalados los siguientes componentes antes de proceder:
+***Participants***
 
-1. **Java JDK** (al menos versión 8 o superior).
-2. **Gradle** (para compilar el proyecto).
-3. **ZeroC Ice** (para configuración y ejecución de servidores y clientes).
+* Mariana Agudelo Salazar
+* Julian Motta
+* Natalia Vargas
 
-## Configuración del Proyecto
+## Prerequisites
 
-1. Clona el repositorio del proyecto:
+Make sure you have the following components installed before proceeding:
+
+1. **Java JDK** (at least version 8 or higher).
+2. **Gradle** (for building the project).
+3. **ZeroC Ice** (for configuring and running servers and clients).
+
+## Project Setup
+
+1. Clone the project repository:
     ```bash
-    git clone <url-del-repositorio>
+    git clone <repository-url>
     ```
 
-Desde la raíz del proyecto /MonteCarloPiEstimation/Montecarlo/...
+From the project root /MonteCarloPiEstimation/Montecarlo/...
 
-2. Construye el proyecto con Gradle:
+2. Build the project with Gradle:
     ```bash
     .\gradlew build
     ```
 
-3. Compila el Master, el Worker y el Cliente
+3. Compile the Master, Worker, and Client:
     ```bash
     .\gradlew :server:build
     .\gradlew :worker:build
     .\gradlew :client:build
     ```
-## Ejecución del Proyecto
 
-Desde la raíz del proyecto /MonteCarloPiEstimation/Montecarlo/...
+## Running the Project
 
-1. Ejecuta el Master
+From the project root /MonteCarloPiEstimation/Montecarlo/...
+
+1. Run the Master:
 
 ```bash
 java -jar master/build/libs/master.jar
 ```
-2. Ejectura el Worker
+2. Run the Worker:
    
  ```bash
 java -jar worker/build/libs/worker.jar
 ```
-> **Nota:** Para añadir más workers abre otra terminal y ejecuta el mismo comando. Repite el proceso para la cantidad de workers que desees.
+> **Note:** To add more workers, open another terminal and run the same command. Repeat the process for the desired number of workers.
 
-3. Ejecuta el Cliente
+3. Run the Client:
    
  ```bash
 java -jar client/build/libs/client.jar
 ```
-
-
-

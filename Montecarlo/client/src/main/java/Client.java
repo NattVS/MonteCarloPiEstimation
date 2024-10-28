@@ -31,7 +31,7 @@ public class Client {
 
                     CompletableFuture<Float> piEstimateFuture = CompletableFuture.supplyAsync(() -> {
                         try {
-                            return master.calculatePiAsync(totalPoints).get();
+                            return master.calculatePiAsync(totalPoints, false).get();
                         } catch (Exception e) {
                             System.err.println("Error al calcular pi: " + e.getMessage());
                             return null;
@@ -50,21 +50,36 @@ public class Client {
                     
                 } else if (option == 2) {
                    
-                    int[] testPoints = {100, 1000, 10000, 100000, 1000000};
+                    int[] testPoints = {100, 1000, 10000, 100000, 1000000, 10000000, -1};
 
                     for (int points : testPoints) {
-                        for (int i = 0; i < 10; i++) {
+                        if (points != -1) {
+                            for (int i = 0; i < 10; i++) {
+
+                                CompletableFuture<Float> piEstimateFuture = CompletableFuture.supplyAsync(() -> {
+                                    try {
+                                        return master.calculatePiAsync(points, true).get();
+                                    } catch (Exception e) {
+                                        return null;
+                                    }
+                                });
+                    
+                                piEstimateFuture.join();
+                            }
+                        } else {
+
                             CompletableFuture<Float> piEstimateFuture = CompletableFuture.supplyAsync(() -> {
                                 try {
-                                    return master.calculatePiAsync(points).get();
+                                    return master.calculatePiAsync(points, true).get();
                                 } catch (Exception e) {
                                     return null;
                                 }
                             });
-
+                
                             piEstimateFuture.join();
                         }
                     }
+
                     System.out.println("Modo prueba ejecutado.");
                 } else {
                     System.out.println("Opcion no valida. Por favor, elija 1 o 2.");

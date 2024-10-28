@@ -17,7 +17,11 @@ import Demo.WorkerPrx;
 public class MasterI implements Demo.Master {
     
     private final Map<String, WorkerPrx> workers = new HashMap<>();
+    private final float REAL_PI = 3.14159265358979323846f;
     private final Timer timer;
+    private int currentAmount = 100; 
+    private ArrayList<Long> durations = new ArrayList<>();
+    private ArrayList<Float> errors = new ArrayList<>();
 
     public MasterI() {
         timer = new Timer(true);
@@ -54,38 +58,86 @@ public class MasterI implements Demo.Master {
         return workers.size();
     }
 
-    public float calculatePi(int numPoints, com.zeroc.Ice.Current current) {
+    public float calculatePi(int numPoints, boolean isTest, com.zeroc.Ice.Current current) {
+
         int numWorkers = workers.size();
         if (numWorkers == 0) {
             System.out.println("No hay workers registrados para realizar la estimacion.");
             return 0.0f;
         }
 
+        if (numPoints != -1){
 
-        System.out.printf("Estimando pi con %d puntos y %d trabajadores...%n", numPoints, numWorkers);
-        int pointsPerWorker = numPoints / numWorkers;
+            System.out.printf("Estimando pi con %d puntos y %d trabajadores...%n", numPoints, numWorkers);
+            int pointsPerWorker = numPoints / numWorkers;
+    
+            long startTime = System.nanoTime();  
+    
+            List<CompletableFuture<Integer>> futures = createWorkerTasks(pointsPerWorker);
+            int totalPointsInCircle = gatherResults(futures);
+    
+            long endTime = System.nanoTime(); 
+           
+    
+            if (totalPointsInCircle < 0) {
+                return 0.0f;
+            }
+    
+            float estimation =  4.0f * totalPointsInCircle / numPoints;
+            System.out.println("Estimacion final: "+ estimation);
+            System.out.println("--------------------------------------");
+    
+            //calcular y añadir variables
+    
+            if (isTest){
+    
+                if (currentAmount == numPoints){
+                    long duration = endTime - startTime; 
+                    durations.add(duration);
+        
+                    float error = Math.abs(estimation - REAL_PI);
+                    errors.add(error);
+                } else {
+                    calculateResults(numWorkers);
+                    currentAmount = numPoints;
+                }
+            }
+            return estimation;
 
-        long startTime = System.nanoTime();  
-
-        List<CompletableFuture<Integer>> futures = createWorkerTasks(pointsPerWorker);
-        int totalPointsInCircle = gatherResults(futures);
-
-        long endTime = System.nanoTime();  // Finalizar tiempo
-        long duration = endTime - startTime;  // Calcular duración en nanosegundos
-
-        if (totalPointsInCircle < 0) {
+        } else {
+            calculateResults(numWorkers);
+            currentAmount = 100;
             return 0.0f;
         }
-
-        writeResultsToFile(numPoints, numWorkers, duration);
-
-        float estimation =  4.0f * totalPointsInCircle / numPoints;
-        System.out.println("Estimacion final: "+ estimation);
-        System.out.println("--------------------------------------");
-        return estimation;
     }
 
-   private void writeResultsToFile(int numPoints, int numWorkers, long duration) {
+    private void calculateResults(int numWorkers){
+        long finalDuration = calculateDuration(durations);
+        float finalError = calculateError(errors);
+        writeResultsToFile(currentAmount, numWorkers, finalDuration, finalError);
+        durations.clear();
+        errors.clear();
+    }
+
+    private long calculateDuration(ArrayList<Long> durations) {
+        durations.remove(0);
+        long sum = 0;
+        for (long duration : durations) {
+            sum += duration;
+        }
+        return sum / durations.size();
+    }
+    
+    private float calculateError(ArrayList<Float> errors) {
+        errors.remove(0);
+        float sum = 0;
+        for (float error : errors) {
+            sum += error;
+        }
+        return sum / errors.size();
+    }
+
+    private void writeResultsToFile(int numPoints, int numWorkers, long duration, float error) {
         String filePath = "resultados.txt";
         File file = new File(filePath);
 
@@ -99,7 +151,7 @@ public class MasterI implements Demo.Master {
         }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-            writer.write("Puntos: " + numPoints + ", Trabajadores: " + numWorkers + ", Tiempo: " + (duration / 1_000_000) + " ms");
+            writer.write("Puntos: " + numPoints + ", Trabajadores: " + numWorkers + ", Tiempo: " + duration + " ns" + ", Error: " + error);
             writer.newLine();
         } catch (IOException e) {
             System.err.println("Error al escribir en el archivo: " + e.getMessage());
